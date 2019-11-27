@@ -15,6 +15,28 @@ from scipy.stats.stats import pearsonr, spearmanr
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
+df_features = pd.read_csv("/home/shikhar/scwrl4/md_struc/all_ems_500/all_rank_3d_feat.csv")
+df_features = df_features.drop(df_features.columns[0], axis=1)
+
+labels = pd.read_csv("/home/shikhar/scwrl4/md_struc/all_ems_500/sel_pep_scores.out", header=None, sep = '\t')
+new_labels = np.ravel(labels.iloc[:,1])
+
+features_train, features_test, targets_train, targets_test = train_test_split(df_features, new_labels, test_size = 0.2,
+                                                                             random_state = 9)
+sc = MinMaxScaler()
+features_train_sc = sc.fit_transform(features_train)
+features_test_sc = sc.transform(features_test)
+
+featuresTrain = torch.from_numpy(features_train_sc)
+featuresTest = torch.from_numpy(features_test_sc)
+targetsTrain = torch.from_numpy(targets_train)
+targetsTest = torch.from_numpy(targets_test)
+
+train = utils.TensorDataset(featuresTrain,targetsTrain)
+test = utils.TensorDataset(featuresTest,targetsTest)
+train_loader = torch.utils.data.DataLoader(train, batch_size = 32, shuffle = True)
+test_loader = torch.utils.data.DataLoader(test, batch_size = 32, shuffle = False)
+
 
 class CNNModel(nn.Module):
     def __init__(self):
