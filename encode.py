@@ -41,7 +41,7 @@ def blosum_encode(sequences):
             mat[i, j, :] = blosum_dict[aa]
     return mat
 
-def embed(sequences):
+def embed(sequences): 
     
     lengths = [len(x) for x in sequences]
     
