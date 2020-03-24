@@ -17,14 +17,17 @@ def evaluation(y_true, y_pred):
     return {'accuracy':acc, 'AUC':roc_curve, 'AUPRC':prc_curve, 'F1-score':f1,
             'pearson': pcc, 'spearman': scc}
 
-def bench_eval(model, sc):
+#tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR) 
+
+def bench_eval(model, sc, seq_int, metric_):
     bench_list = ['bench1', 'bench2', 'bench3', 'bench4', 'bench5', 'bench6', 'bench7', 'bench8',
                   'bench_ic1', 'bench_ic2', 'bench_ic3', 'bench_ic4', 'bench_ic5', 'bench_ic6', 'bench_ic7',
-                  'bench_ic8','bench_ic9', 'bench_t12_1','bench_t12_2','bench_t12_3']
-    bench_auc = []
+                  'bench_ic9', 'bench_t12_1','bench_t12_3']#,'bench_t12_2','bench_ic8']
+    bench_res = []
+    seq_dict = {0: 'emb', 1: 'enc', 2: 'bls'}
     for bench in bench_list:
         struc, y_true, ic = benchmark.struc_lab(bench)
-        seq = benchmark.seq_inf('emb', bench)
+        seq = benchmark.seq_inf(seq_dict[seq_int], bench)
         seq = tf.convert_to_tensor(seq, dtype=tf.float64)
         struc = sc.transform(struc)
         struc = struc.reshape(-1, 1, 60, 64)
@@ -36,8 +39,14 @@ def bench_eval(model, sc):
             probas_ = [np.squeeze(m.predict([struc, seq])) for m in model]
             y_pred = [np.mean(scores) for scores in zip(*probas_)]
         y_pred_list = [int(x>0.5) for x in y_pred]
-        score = roc_auc_score(y_true, y_pred)
+        #y_true = [int(i>0.4256) for i in ic]
+        if metric_ == 'sp':
+            score = abs(spearmanr(ic, y_pred)[0])
+        if metric_ == 'auc':
+            score = roc_auc_score(y_true, y_pred)
+        if metric_ == 'f1':
+            score = f1_score(y_true, np.array([int(x > 0.5) for x in y_pred]))
         print(score)
-        bench_auc.append(score)
-    return np.mean(bench_auc)
+        bench_res.append(score)
+    return np.mean(bench_res)
 
