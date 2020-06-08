@@ -1,0 +1,125 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.utils.data as utils
+import torchvision.transforms as transforms
+from torch.autograd import Variable
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from scipy.stats.stats import pearsonr, spearmanr
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+
+df_features = pd.read_csv("/home/shikhar/scwrl4/md_struc/all_ems_500/all_rank_3d_feat.csv")
+df_features = df_features.drop(df_features.columns[0], axis=1)
+
+labels = pd.read_csv("/home/shikhar/scwrl4/md_struc/all_ems_500/sel_pep_scores.out", header=None, sep = '\t')
+new_labels = np.ravel(labels.iloc[:,1])
+
+features_train, features_test, targets_train, targets_test = train_test_split(df_features, new_labels, test_size = 0.2,
+                                                                             random_state = 9)
+sc = MinMaxScaler()
+features_train_sc = sc.fit_transform(features_train)
+features_test_sc = sc.transform(features_test)
+
+featuresTrain = torch.from_numpy(features_train_sc)
+featuresTest = torch.from_numpy(features_test_sc)
+targetsTrain = torch.from_numpy(targets_train)
+targetsTest = torch.from_numpy(targets_test)
+
+train = utils.TensorDataset(featuresTrain,targetsTrain)
+test = utils.TensorDataset(featuresTest,targetsTest)
+train_loader = torch.utils.data.DataLoader(train, batch_size = 32, shuffle = True)
+test_loader = torch.utils.data.DataLoader(test, batch_size = 32, shuffle = False)
+
+
+class CNNModel(nn.Module):
+    def __init__(self):
+        super(CNNModel, self).__init__()
+        self.cnn1 = nn.Conv2d(in_channels=1, out_channels=16, kernel_size=5, stride=1, padding=2)
+        self.bnn1 = nn.BatchNorm2d(16)
+        self.relu1 = nn.ReLU()
+        self.maxpool1 = nn.MaxPool2d(kernel_size=2)
+        self.cnn2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=5, stride=1, padding=2)
+        self.bnn2 = nn.BatchNorm2d(32)
+        self.relu2 = nn.ReLU()
+        self.maxpool2 =nn.MaxPool2d(kernel_size=2)
+        self.fc1 = nn.Linear(32*15*16,2)
+        self.dropout = nn.Dropout(0.5)
+        
+    def forward(self,x):
+        out = self.cnn1(x)
+        out = self.bnn1(out)
+        out = self.relu1(out)
+        out = self.maxpool1(out)
+        out = self.cnn2(out)
+        out = self.bnn2(out)
+        out = self.relu2(out)
+        out = self.maxpool2(out)
+        out = out.view(out.size(0),-1)
+        out = self.dropout(out)
+        out = self.fc1(out)
+        return out
+        
+        
+num_epochs = int(3000000/ (len(features_train)/100))
+error = nn.CrossEntropyLoss()
+learning_rate = 0.00001
+
+#CUDA_LAUNCH_BLOCKING = 1
+model = CNNModel().float()
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+optimizer = torch.optim.SGD(model.parameters(), lr = learning_rate)
+count = 0
+#running_loss = []
+iteration_list = []
+accuracy_list = []
+tr_loss = []
+ts_loss = []
+tr_corr = []
+ts_corr = []
+
+model.to(device)
+for epoch in range(num_epochs):
+    running_loss = 0.0
+    tr_correct, tr_total, correct, total = 0.0, 0.0, 0.0, 0.0
+    tn, fp, fn = 0,0,0
+    model.train()
+    for i, (images, labels) in enumerate(train_loader):
+        images = Variable(images.view(-1, 1, 60, 64)).to(device)
+        labels = Variable(labels).to(device)
+        optimizer.zero_grad()
+        outputs = model(images.float())
+        loss = error(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        running_loss += float(loss)
+        _, tr_predicted = torch.max(outputs.data, 1)
+        tr_correct += (tr_predicted == labels).sum().item()
+        tr_total += outputs.size(0)
+        
+        
+    if epoch % 10 == 0:
+        model.eval()
+        Xval = Variable(featuresTest.type(torch.FloatTensor), requires_grad=False).to(device)
+        Xval = Xval.view(-1, 1, 60, 64).to(device)
+        yval = model(Xval).cpu()
+        val_loss = error(yval, targetsTest)
+        _, predicted = torch.max(yval.data,1)
+        #print(predicted, targetsTest)
+        correct += ((predicted == 1)==(targetsTest ==1)).sum().item()
+        tn += ((predicted == 0)==(targetsTest == 0)).sum().item()
+        fp += ((predicted == 1)==(targetsTest == 0)).sum().item()
+        fn += ((predicted == 0)==(targetsTest == 1)).sum().item()
+        total += yval.size(0)
+        print("Epoch: {}, tr_loss:{}, ts_loss: {}, tr_acc:{}, ts_acc:{}, f1:{}" .format(epoch, running_loss/len(train_loader),
+                                                            val_loss, tr_correct/tr_total, correct/total,
+                                                            2*correct/(2*correct+fn+fp)))
+                                                            
+print(classification_report(targetsTest, predicted))
+print(confusion_matrix(targetsTest, predicted))
