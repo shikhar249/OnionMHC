@@ -1,0 +1,15 @@
+fold2_model2_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold3_model1_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold4_model1_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold0_model2_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold1_model2_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold2_model0_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold2_model1_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold0_model0_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold0_model1_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold1_model1_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold1_model0_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold3_model2_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold3_model0_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold4_model0_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
+fold4_model2_bls_lstm_weights.h5 filter=lfs diff=lfs merge=lfs -text
