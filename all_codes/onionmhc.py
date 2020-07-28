@@ -60,7 +60,7 @@ def evaluat(abc, seq_int, sc):
     
     return bench_
 
-
+ 
 output = evaluat(args.mod, 2, sc)
 omhc_bf = [50000**(1-x) for x in output]
 sequences = list(pd.read_csv(args.seq, header=None).iloc[:,0])
