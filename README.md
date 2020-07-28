@@ -9,4 +9,4 @@
 5. Numpy 1.17.4 <br />
 
 #### Making Predictions
-`python onionmhc.py -struc <structure based features file> -seq <seqeunce file> -mod path/to/models/fold{0..4}_model{0..2}_bls_lstm.h5 -out <output file>`
+`python onionmhc.py -struc <structure-based features file> -seq <sequence file> -mod path/to/models/fold{0..4}_model{0..2}_bls_lstm.h5 -out <output file>`
