@@ -7,3 +7,6 @@
 3. scikit-learn 0.21.3 <br />
 4. scipy 1.3.2 <br />
 5. Numpy 1.17.4 <br />
+
+#### Making Predictions
+`python onionmhc.py -struc <structure based features file> -seq <seqeunce file> -mod path/to/models/fold{0..4}_model{0..2}_bls_lstm.h5 -out <output file>`
