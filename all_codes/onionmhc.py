@@ -7,9 +7,8 @@ import os, sys
 import benchmark
 import tensorflow as tf
 import numpy as np
-from sklearn.metrics import (roc_auc_score, precision_recall_curve,
-    auc, accuracy_score, f1_score)
-from scipy.stats import pearsonr, spearmanr
+from sklearn.metrics import roc_auc_score
+from scipy.stats import spearmanr
 import pandas as pd
 from tensorflow.keras.models import model_from_json
 
@@ -27,9 +26,7 @@ sc = StandardScaler()
 sc.fit(df_features)
 
 
-fol = list(pd.read_csv("folders", header=None).iloc[:,0])
-
-def evaluat(abc, seq_int, sc):
+def evaluat(seq_int, sc):
 
     seq_dict = {0: 'emb', 1: 'enc', 2: 'bls'}
     struc = benchmark.struc_lab(args.struc)
@@ -55,7 +52,7 @@ def evaluat(abc, seq_int, sc):
 
 
 
-    bench_ = [x/len(abc) for x in bench_]
+    bench_ = [x/15 for x in bench_]
     
     print(bench_)
     
