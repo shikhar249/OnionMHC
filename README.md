@@ -1,6 +1,9 @@
 # OnionMHC
 ### Peptide - HLA-A*02:01 binding prediction using structure and sequence feature sets
 
+<p align="center">
+  <img width="460" height="250" src="https://github.com/shikhar249/OnionMHC/blob/master/image.png">
+</p>
 
 #### Required Modules
 1. Tensorflow 2.0.0 <br />
@@ -31,3 +34,11 @@ git clone https://github.com/shikhar249/OnionMHC
 ```
 python onionmhc.py -struc <structure-based features file> -seq <sequence file> -mod path/to/models/fold{0..4}_model{0..2}_bls_lstm.h5 -out <output file>
 ```
+The example of prediction results will be shown as:
+
+| peptide_sequences | OnionMHC_score | Binding_affinity(nM) |
+| -----------------| :-----------: | :---------: |
+| FLIAYQPLL  |      0.901299    |          2.909335|
+| NLLTTPKFT  |      0.483376    |        267.669274|
+|GTHSWEYWG   |     0.062278     |     25487.509380 |
+|... | ... | ...|
